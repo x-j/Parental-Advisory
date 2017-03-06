@@ -7,18 +7,25 @@ using System.Windows.Forms;
 using MathNet.Numerics;
 
 namespace Parental_Advisory {
+
     public partial class MainWindow : Form {
+
+        private const bool DEBUG = true;
+        private const int GRAPH_LINE_WIDTH = 3;
 
         private bool graphIsUpdated;
         private Image CurrentImage;
         private SliderDialog slider;
-        private bool debug;
 
-        public string ImageFilename { get; private set; }
+        public string ImageFilename {
+            get; private set;
+        }
 
         private Graph graph;
 
-        private enum FunctionFilters { NULL_TRANSFORM, INVERT, BRIGHTEN, CONTRAST }
+        private enum FunctionFilters {
+            NULL_TRANSFORM, INVERT, BRIGHTEN, CONTRAST
+        }
 
         public MainWindow() {
             InitializeComponent();
@@ -27,21 +34,18 @@ namespace Parental_Advisory {
             graphIsUpdated = false;
             slider = new SliderDialog();
 
-            debug = true;
-
-            if (debug) {
-                if (File.Exists("temp.bmp")) {
+            if(DEBUG) {
+                if(File.Exists("temp.bmp")) {
                     UpdateImageDisplay(new Bitmap("temp.bmp"));
                     CurrentImage = new Bitmap("temp.bmp");
-                } else
+                } else {
                     openFileDialog.ShowDialog();
+                    File.Copy(ImageFilename, "temp.bmp");
+                }
             }
         }
 
         private void openFileDialog_FileOk(object sender, CancelEventArgs e) {
-            this.WindowState = FormWindowState.Minimized;
-            this.Show();
-            this.WindowState = FormWindowState.Normal;
             ImageFilename = openFileDialog.FileName;
             CurrentImage = new Bitmap(ImageFilename);
             graph.Reset();
@@ -49,7 +53,7 @@ namespace Parental_Advisory {
         }
 
         private void UpdateImageDisplay(Image newImage = null) {
-            if (newImage != null)
+            if(newImage != null)
                 pictureBox.Image = newImage;
             graphPanel.Visible = true;
             resetButton.Visible = true;
@@ -63,7 +67,7 @@ namespace Parental_Advisory {
         }
 
         private void graphPanel_Paint(object sender, PaintEventArgs e) {
-            if (!graphIsUpdated) {
+            if(!graphIsUpdated) {
                 graphPanel.BackgroundImage = MakeGraph();
                 graphIsUpdated = true;
             }
@@ -77,47 +81,83 @@ namespace Parental_Advisory {
             Graphics graphics = Graphics.FromImage(bitmap);
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            Pen linePen = new Pen(Color.DarkBlue, 2);
+            Pen linePen = new Pen(Color.DarkBlue, GRAPH_LINE_WIDTH);
             Brush pointBrush = new SolidBrush(Color.DarkRed);
             Pen dashedPen = new Pen(Color.DimGray, 1);
             dashedPen.DashStyle = System.Drawing.Drawing2D.DashStyle.DashDot;
 
-            for (int i = 1; i < graph.CountPoints(); i++) {
-                Point a = graph.PanelPoints.Values[i - 1];
-                Point b = graph.PanelPoints.Values[i];
+            for(int i = 1; i < graph.CountPoints(); i++) {
+                Point a = graph.MaterialPoints.Values[i - 1];
+                Point b = graph.MaterialPoints.Values[i];
 
                 bool segmentInRange = true;
 
-                if (a.Y > graphPanel.Height) {
+                if(a.Y > graphPanel.Height) {
                     segmentInRange = false;
 
-                    double[] exes = { a.X, b.X };
-                    double[] whys = { a.Y, b.Y };
-                    var linFunction = Fit.Line(exes, whys);
-                    Point zero = new Point((int)(-linFunction.Item1 / linFunction.Item2), 0);
+                    Point abstractA = graph.CreateAbstractFromMaterial(a);
+                    Point abstractB = graph.CreateAbstractFromMaterial(b);
 
-                    graphics.DrawLine(linePen, graph.Start, zero);
-                    graphics.DrawLine(linePen, zero, b);
-                    graphics.FillEllipse(pointBrush, zero.X - 3, zero.Y - 3, 6, 6);
-                    graphics.FillEllipse(pointBrush, b.X - 3, b.Y - 3, 6, 6);
+                    var linFunction = BuildLinFunction(abstractA, abstractB);
+                    Point abstractZero = new Point((int)(-linFunction.Item1 / linFunction.Item2), 0);
+                    Point materialZero = graph.CreateMaterialFromAbstract(abstractZero);
+
+                    graphics.DrawLine(linePen, graph.Start, materialZero);
+                    graphics.DrawLine(linePen, materialZero, b);
+                    graphics.FillEllipse(pointBrush, materialZero.X - GRAPH_LINE_WIDTH, materialZero.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                    graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
                 }
-                if (b.Y < 0) {
+                if(b.Y > graphPanel.Height) {
                     segmentInRange = false;
 
-                    double[] exes = { a.X, b.X };
-                    double[] whys = { a.Y, b.Y };
-                    var linFunction = Fit.Line(exes, whys);
-                    Point ceiling = new Point((int)((255 - linFunction.Item1) / linFunction.Item2), 0);
+                    Point abstractA = graph.CreateAbstractFromMaterial(a);
+                    Point abstractB = graph.CreateAbstractFromMaterial(b);
 
-                    graphics.DrawLine(linePen, a, ceiling);
-                    graphics.DrawLine(linePen, ceiling, graph.End);
-                    graphics.FillEllipse(pointBrush, ceiling.X - 3, ceiling.Y - 3, 6, 6);
-                    graphics.FillEllipse(pointBrush, b.X - 3, b.Y - 3, 6, 6);
+                    var linFunction = BuildLinFunction(abstractA, abstractB);
+                    Point abstractZero = new Point((int)(-linFunction.Item1 / linFunction.Item2), 0);
+                    Point materialZero = graph.CreateMaterialFromAbstract(abstractZero);
+
+                    graphics.DrawLine(linePen, graph.EndX, materialZero);
+                    graphics.DrawLine(linePen, materialZero, a);
+                    graphics.FillEllipse(pointBrush, materialZero.X - GRAPH_LINE_WIDTH, materialZero.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                    graphics.FillEllipse(pointBrush, a.X - GRAPH_LINE_WIDTH, a.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
                 }
-                if (segmentInRange) {
+                if(b.Y < 0) {
+                    segmentInRange = false;
+
+                    Point abstractA = graph.CreateAbstractFromMaterial(a);
+                    Point abstractB = graph.CreateAbstractFromMaterial(b);
+
+                    var linFunction = BuildLinFunction(abstractA, abstractB);
+
+                    Point abstractCeiling = new Point((int)((255 - linFunction.Item1) / linFunction.Item2), 255);
+                    Point materialCeiling = graph.CreateMaterialFromAbstract(abstractCeiling);
+
+                    graphics.DrawLine(linePen, a, materialCeiling);
+                    graphics.DrawLine(linePen, materialCeiling, graph.End);
+                    graphics.FillEllipse(pointBrush, materialCeiling.X - GRAPH_LINE_WIDTH, materialCeiling.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                    graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                }
+                if(a.Y < 0) {
+                    segmentInRange = false;
+
+                    Point abstractA = graph.CreateAbstractFromMaterial(a);
+                    Point abstractB = graph.CreateAbstractFromMaterial(b);
+
+                    var linFunction = BuildLinFunction(abstractA, abstractB);
+
+                    Point abstractCeiling = new Point((int)((255 - linFunction.Item1) / linFunction.Item2), 255);
+                    Point materialCeiling = graph.CreateMaterialFromAbstract(abstractCeiling);
+
+                    graphics.DrawLine(linePen, graph.StartY, materialCeiling);
+                    graphics.DrawLine(linePen, materialCeiling, b);
+                    graphics.FillEllipse(pointBrush, materialCeiling.X - GRAPH_LINE_WIDTH, materialCeiling.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                    graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                }
+                if(segmentInRange) {
                     graphics.DrawLine(linePen, a, b);
-                    graphics.FillEllipse(pointBrush, a.X - 3, a.Y - 3, 6, 6);
-                    graphics.FillEllipse(pointBrush, b.X - 3, b.Y - 3, 6, 6);
+                    graphics.FillEllipse(pointBrush, a.X - GRAPH_LINE_WIDTH, a.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
+                    graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH*2, GRAPH_LINE_WIDTH*2);
                 }
             }
 
@@ -157,20 +197,20 @@ namespace Parental_Advisory {
 
             Bitmap newImage = bitmap.Clone() as Bitmap;
 
-            switch (filter) {
+            switch(filter) {
                 case (FunctionFilters.NULL_TRANSFORM):
                     return newImage;
 
                 case (FunctionFilters.INVERT):
-                    for (int i = 0; i < graph.CountPoints(); i++) {
-                        Point point = graph.PanelPoints.Values[i];
+                    for(int i = 0; i < graph.CountPoints(); i++) {
+                        Point point = graph.MaterialPoints.Values[i];
                         graph.MovePanelPoint(i, point.X, graphPanel.Height - point.Y);
                     }
                     break;
 
                 case (FunctionFilters.BRIGHTEN):
-                    for (int i = 0; i < graph.CountPoints(); i++) {
-                        Point point = graph.PanelPoints.Values[i];
+                    for(int i = 0; i < graph.CountPoints(); i++) {
+                        Point point = graph.MaterialPoints.Values[i];
                         graph.MovePanelPoint(i, point.X, point.Y - filterValue);
                     }
                     break;
@@ -178,8 +218,8 @@ namespace Parental_Advisory {
             graphIsUpdated = false;
             graphPanel.Refresh();
 
-            for (int y = 0; y < newImage.Height; y++) {
-                for (int x = 0; x < newImage.Width; x++) {
+            for(int y = 0; y < newImage.Height; y++) {
+                for(int x = 0; x < newImage.Width; x++) {
 
                     Color oldColor = newImage.GetPixel(x, y);
                     int red = oldColor.R;
@@ -201,20 +241,17 @@ namespace Parental_Advisory {
         private int ApplyFilterToChannel(int intensity) {
 
             Point a = new Point(), b = new Point();
-            for (int i = 1; i < graph.CountPoints(); i++) {
+            for(int i = 1; i < graph.CountPoints(); i++) {
                 var point = graph.AbstractPoints.Values[i];
-                if (point.X >= intensity) {
+                if(point.X >= intensity) {
                     a = graph.AbstractPoints.Values[i - 1];
                     b = graph.AbstractPoints.Values[i];
                     break;
                 }
             }
-            double[] exes = { a.X, b.X };
-            double[] whys = { a.Y, b.Y };
-
             //linFunction will be a tuple of doubles, first one is q, the second one is p
             //y = px + q
-            var linFunction = Fit.Line(exes, whys);
+            var linFunction = BuildLinFunction(a, b);
             int newValue = (int)(intensity * linFunction.Item2 + linFunction.Item1);
 
             return Clamp(newValue, 0, 255);
@@ -222,7 +259,7 @@ namespace Parental_Advisory {
 
         private void brightnessButton_Click(object sender, EventArgs e) {
             slider.ShowDialog();
-            if (slider.ValueObtained) {
+            if(slider.ValueObtained) {
                 var value = slider.Value;
                 slider.Reset();
                 ProcessImage(FunctionFilters.BRIGHTEN, value);
@@ -232,13 +269,21 @@ namespace Parental_Advisory {
         private void pictureBox_Click(object sender, EventArgs e) {
 
         }
+
+        //some helpful math functions:
+        #region
         public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> {
-            if (value.CompareTo(min) < 0)
+            if(value.CompareTo(min) < 0)
                 return min;
-            if (value.CompareTo(max) > 0)
+            if(value.CompareTo(max) > 0)
                 return max;
             return value;
         }
-
+        private Tuple<double, double> BuildLinFunction(Point a, Point b) {
+            double[] exes = { a.X, b.X };
+            double[] whys = { a.Y, b.Y };
+            return Fit.Line(exes, whys);
+        }
+        #endregion
     }
 }
