@@ -64,6 +64,9 @@
     <Compile Include="SliderDialog.Designer.cs">
       <DependentUpon>SliderDialog.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="MainWindow.resx">
+      <DependentUpon>MainWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

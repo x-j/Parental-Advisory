@@ -6,77 +6,101 @@ using System.Windows.Forms;
 namespace Parental_Advisory {
     class Graph {
 
-        //Start and End are start- and endpoints in the context of the Panel
-        public Panel Panel { get; private set; }
+        private Panel panel;
+        //Start and End are start- and endpoints in the context of the panel
         public Point Start { get; private set; }
         public Point End { get; private set; }
         public Point EndX { get; private set; }
         public Point StartY { get; private set; }
-        private Dictionary<Point, Point> dictionary;
+        public Dictionary<Point, Point> Dictionary { get; private set; }
         public SortedList<int, Point> MaterialPoints { get; private set; }
         public SortedList<int, Point> AbstractPoints { get; private set; }
         public int CountPoints() => AbstractPoints.Count;
 
-        public Graph(Panel graphPanel) {
+        public Graph(Panel graphpanel) {
 
-            Panel = graphPanel;
-            Start = new Point(0, graphPanel.Height);
-            End = Point.Add(Start, new Size(graphPanel.Width, -graphPanel.Height));
-            EndX = new Point(graphPanel.Width, graphPanel.Height);
+            panel = graphpanel;
+            Start = new Point(0, graphpanel.Height);
+            End = Point.Add(Start, new Size(graphpanel.Width, -graphpanel.Height));
+            EndX = new Point(graphpanel.Width, graphpanel.Height);
             StartY = new Point(0, 0);
 
             AbstractPoints = new SortedList<int, Point>();
             MaterialPoints = new SortedList<int, Point>();
-            dictionary = new Dictionary<Point, Point>();
+            Dictionary = new Dictionary<Point, Point>();
 
-            AddPanelPoint(Start);
-            AddPanelPoint(End);
+            AddMaterialPoint(Start);
+            AddMaterialPoint(End);
         }
 
         internal void Reset() {
             MaterialPoints.Clear();
             AbstractPoints.Clear();
-            dictionary.Clear();
-            AddPanelPoint(Start);
-            AddPanelPoint(End);
+            Dictionary.Clear();
+            AddMaterialPoint(Start);
+            AddMaterialPoint(End);
         }
 
-        //PanelPointAdd adds a point from the panel
-        internal void AddPanelPoint(Point p) {
+        //panelPointAdd adds a point from the panel
+        internal void AddMaterialPoint(Point p) {
             MaterialPoints.Add(p.X, p);
 
             //translate the new point into the abstract 0-255 context
             Point abstractP = CreateAbstractFromMaterial(p);
             AbstractPoints.Add(abstractP.X, abstractP);
 
-            dictionary.Add(p, abstractP);
+            Dictionary.Add(p, abstractP);
         }
 
-        internal void MovePanelPoint(int panelIndex, int newX, int newY) {
+        internal void MoveMaterialPoint(int panelIndex, int newX, int newY) {
 
             Point p = MaterialPoints.Values[panelIndex];
-            var abstractP = dictionary[p];
+            var abstractP = Dictionary[p];
             MaterialPoints.Remove(p.X);
-            dictionary.Remove(p);
+            Dictionary.Remove(p);
             AbstractPoints.Remove(abstractP.X);
 
             //move the point on the panel
             p.X = newX;
             p.Y = newY;
 
-            AddPanelPoint(p);
+            AddMaterialPoint(p);
+        }
+
+        internal void MoveMaterialPoint(Point? caughtPoint, int newX, int newY) {
+
+            int index = MaterialPoints.IndexOfValue((Point)caughtPoint);
+            Point p = MaterialPoints.Values[index];
+
+            var abstractP = Dictionary[p];
+            MaterialPoints.Remove(p.X);
+            Dictionary.Remove(p);
+            AbstractPoints.Remove(abstractP.X);
+
+            //move the point on the panel
+            p.X = newX;
+            p.Y = newY;
+
+            AddMaterialPoint(p);
         }
 
         public Point CreateAbstractFromMaterial(Point p) {
-            int abstractX = (int)(((double)p.X / Panel.Width) * 255);
-            int abstractY = (int)(((double)(255 - p.Y) / Panel.Height) * 255);
+            int abstractX = (int)(((double)p.X / panel.Width) * 255);
+            int abstractY = (int)(((double)(panel.Height - p.Y) / panel.Height) * 255);
             return new Point(abstractX, abstractY);
         }
 
         public Point CreateMaterialFromAbstract(Point p) {
-            int materialX = (int)(((double)p.X / 255) * Panel.Width);
-            int materialY = -(int)(((double)p.Y / 255) * Panel.Height) + Panel.Height;
+            int materialX = (int)(((double)p.X / 255) * panel.Width);
+            int materialY = -(int)(((double)p.Y / 255) * panel.Height) + panel.Height;
             return new Point(materialX, materialY);
+        }
+
+        internal void RemoveMaterialPoint(Point p) {
+            var abstractP = Dictionary[p];
+            MaterialPoints.Remove(p.X);
+            Dictionary.Remove(p);
+            AbstractPoints.Remove(abstractP.X);
         }
     }
 }

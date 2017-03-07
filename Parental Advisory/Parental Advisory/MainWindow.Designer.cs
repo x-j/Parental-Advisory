@@ -26,6 +26,7 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.bottomPanel = new System.Windows.Forms.Panel();
             this.filterPanel = new System.Windows.Forms.Panel();
+            this.brightnessButton = new System.Windows.Forms.Button();
             this.invertButton = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.loadImageButton = new System.Windows.Forms.Button();
@@ -34,7 +35,8 @@
             this.rightPanel = new System.Windows.Forms.Panel();
             this.resetButton = new System.Windows.Forms.Button();
             this.graphPanel = new System.Windows.Forms.Panel();
-            this.brightnessButton = new System.Windows.Forms.Button();
+            this.contrastButton = new System.Windows.Forms.Button();
+            this.blurButton = new System.Windows.Forms.Button();
             this.bottomPanel.SuspendLayout();
             this.filterPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -51,7 +53,7 @@
             // 
             // bottomPanel
             // 
-            this.bottomPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.bottomPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.bottomPanel.BackColor = System.Drawing.SystemColors.Window;
             this.bottomPanel.Controls.Add(this.filterPanel);
@@ -64,21 +66,41 @@
             // 
             // filterPanel
             // 
-            this.filterPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.filterPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.filterPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.filterPanel.Controls.Add(this.blurButton);
+            this.filterPanel.Controls.Add(this.contrastButton);
             this.filterPanel.Controls.Add(this.brightnessButton);
             this.filterPanel.Controls.Add(this.invertButton);
-            this.filterPanel.Location = new System.Drawing.Point(67, 0);
+            this.filterPanel.Location = new System.Drawing.Point(91, 0);
             this.filterPanel.Name = "filterPanel";
-            this.filterPanel.Size = new System.Drawing.Size(517, 99);
+            this.filterPanel.Size = new System.Drawing.Size(493, 99);
             this.filterPanel.TabIndex = 2;
             this.filterPanel.Visible = false;
             // 
+            // brightnessButton
+            // 
+            this.brightnessButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.brightnessButton.BackColor = System.Drawing.Color.Transparent;
+            this.brightnessButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.brightnessButton.FlatAppearance.BorderSize = 0;
+            this.brightnessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.brightnessButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.brightnessButton.ForeColor = System.Drawing.Color.Black;
+            this.brightnessButton.Location = new System.Drawing.Point(91, 4);
+            this.brightnessButton.Name = "brightnessButton";
+            this.brightnessButton.Size = new System.Drawing.Size(82, 91);
+            this.brightnessButton.TabIndex = 4;
+            this.brightnessButton.Text = "Brightness";
+            this.brightnessButton.UseVisualStyleBackColor = false;
+            this.brightnessButton.Click += new System.EventHandler(this.brightnessButton_Click);
+            // 
             // invertButton
             // 
-            this.invertButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.invertButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.invertButton.BackColor = System.Drawing.Color.Transparent;
             this.invertButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
@@ -86,9 +108,9 @@
             this.invertButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.invertButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.invertButton.ForeColor = System.Drawing.Color.Black;
-            this.invertButton.Location = new System.Drawing.Point(3, 4);
+            this.invertButton.Location = new System.Drawing.Point(3, 5);
             this.invertButton.Name = "invertButton";
-            this.invertButton.Size = new System.Drawing.Size(57, 91);
+            this.invertButton.Size = new System.Drawing.Size(82, 91);
             this.invertButton.TabIndex = 3;
             this.invertButton.Text = "Color invert";
             this.invertButton.UseVisualStyleBackColor = false;
@@ -111,7 +133,7 @@
             // 
             // loadImageButton
             // 
-            this.loadImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.loadImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.loadImageButton.BackColor = System.Drawing.Color.Transparent;
             this.loadImageButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
@@ -121,7 +143,7 @@
             this.loadImageButton.ForeColor = System.Drawing.Color.Black;
             this.loadImageButton.Location = new System.Drawing.Point(3, 4);
             this.loadImageButton.Name = "loadImageButton";
-            this.loadImageButton.Size = new System.Drawing.Size(58, 91);
+            this.loadImageButton.Size = new System.Drawing.Size(82, 91);
             this.loadImageButton.TabIndex = 0;
             this.loadImageButton.Text = "Load image";
             this.loadImageButton.UseVisualStyleBackColor = false;
@@ -129,8 +151,8 @@
             // 
             // pictureBox
             // 
-            this.pictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.pictureBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.pictureBox.Location = new System.Drawing.Point(0, 0);
@@ -143,8 +165,8 @@
             // 
             // topPanel
             // 
-            this.topPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.topPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.topPanel.BackColor = System.Drawing.SystemColors.ControlLight;
             this.topPanel.Controls.Add(this.rightPanel);
@@ -156,7 +178,7 @@
             // 
             // rightPanel
             // 
-            this.rightPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.rightPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rightPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.rightPanel.Controls.Add(this.resetButton);
@@ -168,7 +190,7 @@
             // 
             // resetButton
             // 
-            this.resetButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.resetButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.resetButton.BackColor = System.Drawing.Color.Transparent;
             this.resetButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
@@ -194,24 +216,46 @@
             this.graphPanel.TabIndex = 0;
             this.graphPanel.Visible = false;
             this.graphPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.graphPanel_Paint);
+            this.graphPanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseClick);
+            this.graphPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseDown);
+            this.graphPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseMove);
+            this.graphPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseUp);
             // 
-            // brightnessButton
+            // contrastButton
             // 
-            this.brightnessButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.contrastButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
-            this.brightnessButton.BackColor = System.Drawing.Color.Transparent;
-            this.brightnessButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.brightnessButton.FlatAppearance.BorderSize = 0;
-            this.brightnessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.brightnessButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.brightnessButton.ForeColor = System.Drawing.Color.Black;
-            this.brightnessButton.Location = new System.Drawing.Point(66, 4);
-            this.brightnessButton.Name = "brightnessButton";
-            this.brightnessButton.Size = new System.Drawing.Size(77, 91);
-            this.brightnessButton.TabIndex = 4;
-            this.brightnessButton.Text = "Brightness";
-            this.brightnessButton.UseVisualStyleBackColor = false;
-            this.brightnessButton.Click += new System.EventHandler(this.brightnessButton_Click);
+            this.contrastButton.BackColor = System.Drawing.Color.Transparent;
+            this.contrastButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.contrastButton.FlatAppearance.BorderSize = 0;
+            this.contrastButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.contrastButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.contrastButton.ForeColor = System.Drawing.Color.Black;
+            this.contrastButton.Location = new System.Drawing.Point(179, 5);
+            this.contrastButton.Name = "contrastButton";
+            this.contrastButton.Size = new System.Drawing.Size(82, 91);
+            this.contrastButton.TabIndex = 5;
+            this.contrastButton.Text = "Contrast";
+            this.contrastButton.UseVisualStyleBackColor = false;
+            this.contrastButton.Click += new System.EventHandler(this.contrastButton_Click);
+            // 
+            // blurButton
+            // 
+            this.blurButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.blurButton.BackColor = System.Drawing.Color.Transparent;
+            this.blurButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.blurButton.FlatAppearance.BorderSize = 0;
+            this.blurButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.blurButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.blurButton.ForeColor = System.Drawing.Color.Black;
+            this.blurButton.Location = new System.Drawing.Point(261, 3);
+            this.blurButton.Name = "blurButton";
+            this.blurButton.Size = new System.Drawing.Size(82, 91);
+            this.blurButton.TabIndex = 6;
+            this.blurButton.Text = "Blur";
+            this.blurButton.UseVisualStyleBackColor = false;
+            this.blurButton.Click += new System.EventHandler(this.blurButton_Click);
             // 
             // MainWindow
             // 
@@ -247,6 +291,8 @@
         private System.Windows.Forms.Panel filterPanel;
         private System.Windows.Forms.Button invertButton;
         private System.Windows.Forms.Button brightnessButton;
+        private System.Windows.Forms.Button contrastButton;
+        private System.Windows.Forms.Button blurButton;
     }
 }
 
