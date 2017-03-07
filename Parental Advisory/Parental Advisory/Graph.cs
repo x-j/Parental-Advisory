@@ -51,7 +51,7 @@ namespace Parental_Advisory {
                 AbstractPoints.Add(abstractP.X, abstractP);
 
                 Dictionary.Add(p, abstractP);
-            } catch(ArgumentException) {
+            } catch (ArgumentException) {
                 Random r = new Random();
                 int v = r.Next(0, 100);
                 p.X += (v > 50 ? 1 : -1);
@@ -96,6 +96,27 @@ namespace Parental_Advisory {
 
             AddMaterialPoint(p);
         }
+        internal void MoveAbstractPoint(int i, int newX, int newY) {
+            Point p = AbstractPoints.Values[i];
+            Point materialP = new Point();
+
+            AbstractPoints.Remove(p.X);
+
+            foreach (var point in Dictionary.Keys) {
+                if (Dictionary[point].Equals(p))
+                    materialP = point;
+            }
+            Dictionary.Remove(materialP);
+            MaterialPoints.Remove(materialP.X);
+
+            p.X = newX;
+            p.Y = newY;
+
+            materialP = CreateMaterialFromAbstract(p);
+
+            AddMaterialPoint(materialP);
+        }
+
 
         public Point CreateAbstractFromMaterial(Point p) {
             int abstractX = (int)(((double)p.X / panel.Width) * 255);
@@ -115,5 +136,7 @@ namespace Parental_Advisory {
             Dictionary.Remove(p);
             AbstractPoints.Remove(abstractP.X);
         }
+
+
     }
 }

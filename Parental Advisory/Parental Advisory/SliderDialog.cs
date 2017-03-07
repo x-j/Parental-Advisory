@@ -23,25 +23,25 @@ namespace Parental_Advisory {
             private set;
         }
 
-        private void trackBar_MouseUp(object sender, MouseEventArgs e) {
-            this.Value = trackBar.Value;
-            ValueObtained = true;
-            this.Close();
-        }
-
-        private void trackBar_KeyPress(object sender, KeyPressEventArgs e) {
-            if(e.KeyChar == (char)27) {
-                ValueObtained = false;
-                this.Close();
-            }
-        }
-
         internal void Reset() {
-            trackBar.Value = 0;
+            upDown.Value = 0;
         }
 
         internal void MoveSliderTo(int v) {
-            trackBar.Value = v;
+            upDown.Value = v;
+        }
+
+        private void okButton_Click(object sender, EventArgs e) {
+            Value = (int)upDown.Value;
+            ValueObtained = true;
+            Close();
+        }
+
+        private void upDown_KeyPress(object sender, KeyPressEventArgs e) {
+            if (e.KeyChar == (char)27) {
+                ValueObtained = false;
+                Close();
+            }
         }
     }
 }

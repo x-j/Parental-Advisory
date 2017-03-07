@@ -4,6 +4,8 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using MathNet.Numerics;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Parental_Advisory {
 
@@ -13,7 +15,6 @@ namespace Parental_Advisory {
         private const int GRAPH_LINE_WIDTH = 3;
         private const int POINT_CATCH_RADIUS = 8;
         private const int MATRIX_SIZE = 3;
-        private const double SHARPEN_KERNEL_ANCHOR_VALUE = 5.0;
 
         private bool graphIsUpdated;
         private Image OriginalImage;
@@ -24,13 +25,14 @@ namespace Parental_Advisory {
         private Graph graph;
         private int caughtPointIndex;
         private Point newCaughtPosition;
-        private double EDGE_DETECT_KERNEL_ANCHOR_VALUE = 8;
 
         private enum FilterType {
             NULL_TRANSFORM, INVERT, BRIGHTEN, CONTRAST, BLUR,
             SHARPEN,
             EDGE_DETECT,
-            EMBOSS
+            EMBOSS,
+            MEDIAN,
+            GAUSSIAN_SMOOTHING
         }
 
         public MainWindow() {
@@ -42,8 +44,8 @@ namespace Parental_Advisory {
 
             caughtPointIndex = -1;  //initialize to -1, because nothing is caught.
 
-            if(DEBUG) {
-                if(File.Exists("temp.bmp")) {
+            if (DEBUG) {
+                if (File.Exists("temp.bmp")) {
                     UpdateImageDisplay(new Bitmap("temp.bmp"));
                     OriginalImage = new Bitmap("temp.bmp");
                 } else {
@@ -55,6 +57,7 @@ namespace Parental_Advisory {
         }
 
         private void openFileDialog_FileOk(object sender, CancelEventArgs e) {
+            BringToFront();
             ImageFilename = openFileDialog.FileName;
             OriginalImage = new Bitmap(ImageFilename);
             graph.Reset();
@@ -62,7 +65,7 @@ namespace Parental_Advisory {
         }
 
         private void UpdateImageDisplay(Image newImage = null) {
-            if(newImage != null)
+            if (newImage != null)
                 pictureBox.Image = newImage;
             graphPanel.Visible = true;
             resetButton.Visible = true;
@@ -76,7 +79,7 @@ namespace Parental_Advisory {
         }
 
         private void graphPanel_Paint(object sender, PaintEventArgs e) {
-            if(!graphIsUpdated) {
+            if (!graphIsUpdated) {
                 graphPanel.BackgroundImage = MakeGraph();
                 graphIsUpdated = true;
             }
@@ -103,11 +106,11 @@ namespace Parental_Advisory {
             graph.MaterialPoints.Values.CopyTo(workingCopies, 0);
 
             try {
-                if(caughtPointIndex > 0) {
+                if (caughtPointIndex > 0) {
                     workingCopies[caughtPointIndex] = newCaughtPosition;
-                    for(int i = 0; i < workingCopies.Length - 1; i++) {
-                        for(int j = 0; j < workingCopies.Length - 1; j++) {
-                            if(workingCopies[j].X > workingCopies[j + 1].X) {
+                    for (int i = 0; i < workingCopies.Length - 1; i++) {
+                        for (int j = 0; j < workingCopies.Length - 1; j++) {
+                            if (workingCopies[j].X > workingCopies[j + 1].X) {
                                 Point temp = new Point(workingCopies[j].X, workingCopies[j].Y);
                                 workingCopies[j] = workingCopies[j + 1];
                                 workingCopies[j + 1] = temp;
@@ -117,13 +120,13 @@ namespace Parental_Advisory {
                 }
 
                 //the for loop below draws the correct lines between points
-                for(int i = 1; i < workingCopies.Length; i++) {
+                for (int i = 1; i < workingCopies.Length; i++) {
                     Point a = workingCopies[i - 1];
                     Point b = workingCopies[i];
 
                     bool segmentInRange = true;
 
-                    if(a.Y > graphPanel.Height) {
+                    if (a.Y > graphPanel.Height) {
                         segmentInRange = false;
 
                         Point abstractA = graph.CreateAbstractFromMaterial(a);
@@ -138,7 +141,7 @@ namespace Parental_Advisory {
                         graphics.FillEllipse(pointBrush, materialZero.X - GRAPH_LINE_WIDTH, materialZero.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                         graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                     }
-                    if(b.Y > graphPanel.Height) {
+                    if (b.Y > graphPanel.Height) {
                         segmentInRange = false;
 
                         Point abstractA = graph.CreateAbstractFromMaterial(a);
@@ -148,12 +151,13 @@ namespace Parental_Advisory {
                         Point abstractZero = new Point((int)(-linFunction.Item1 / linFunction.Item2), 0);
                         Point materialZero = graph.CreateMaterialFromAbstract(abstractZero);
 
-                        graphics.DrawLine(linePen, graph.EndX, materialZero);
+                        if (i == workingCopies.Length - 1)
+                            graphics.DrawLine(linePen, graph.EndX, materialZero);
                         graphics.DrawLine(linePen, materialZero, a);
                         graphics.FillEllipse(pointBrush, materialZero.X - GRAPH_LINE_WIDTH, materialZero.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                         graphics.FillEllipse(pointBrush, a.X - GRAPH_LINE_WIDTH, a.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                     }
-                    if(b.Y < 0) {
+                    if (b.Y < 0) {
                         segmentInRange = false;
 
                         Point abstractA = graph.CreateAbstractFromMaterial(a);
@@ -165,11 +169,12 @@ namespace Parental_Advisory {
                         Point materialCeiling = graph.CreateMaterialFromAbstract(abstractCeiling);
 
                         graphics.DrawLine(linePen, a, materialCeiling);
-                        graphics.DrawLine(linePen, materialCeiling, graph.End);
+                        if (i == workingCopies.Length - 1)
+                            graphics.DrawLine(linePen, materialCeiling, graph.End);
                         graphics.FillEllipse(pointBrush, materialCeiling.X - GRAPH_LINE_WIDTH, materialCeiling.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                         graphics.FillEllipse(pointBrush, a.X - GRAPH_LINE_WIDTH, a.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                     }
-                    if(a.Y < 0) {
+                    if (a.Y < 0) {
                         segmentInRange = false;
 
                         Point abstractA = graph.CreateAbstractFromMaterial(a);
@@ -180,19 +185,20 @@ namespace Parental_Advisory {
                         Point abstractCeiling = new Point((int)((255 - linFunction.Item1) / linFunction.Item2), 255);
                         Point materialCeiling = graph.CreateMaterialFromAbstract(abstractCeiling);
 
-                        graphics.DrawLine(linePen, graph.StartY, materialCeiling);
+                        if (i == 1)
+                            graphics.DrawLine(linePen, graph.StartY, materialCeiling);
                         graphics.DrawLine(linePen, materialCeiling, b);
                         graphics.FillEllipse(pointBrush, materialCeiling.X - GRAPH_LINE_WIDTH, materialCeiling.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                         graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                     }
-                    if(segmentInRange) {
+                    if (segmentInRange) {
                         graphics.DrawLine(linePen, a, b);
                         graphics.FillEllipse(pointBrush, a.X - GRAPH_LINE_WIDTH, a.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                         graphics.FillEllipse(pointBrush, b.X - GRAPH_LINE_WIDTH, b.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
                     }
                 }
 
-                if(caughtPointIndex > 0)
+                if (caughtPointIndex > 0)
                     graphics.DrawEllipse(newPosPen, newCaughtPosition.X - GRAPH_LINE_WIDTH, newCaughtPosition.Y - GRAPH_LINE_WIDTH, GRAPH_LINE_WIDTH * 2, GRAPH_LINE_WIDTH * 2);
 
                 var halfHeight = graphPanel.Height / 2;
@@ -205,7 +211,7 @@ namespace Parental_Advisory {
 
                 graphics.DrawLine(dashedPen, north, south);
                 graphics.DrawLine(dashedPen, east, west);
-            } catch(OverflowException) {
+            } catch (OverflowException) {
                 return bitmap;
             }
             linePen.Dispose();
@@ -217,144 +223,98 @@ namespace Parental_Advisory {
         private void ProcessImage(FilterType filter = FilterType.NULL_TRANSFORM, int value = 0) {
 
             Image newImage;
-            if(filter <= FilterType.CONTRAST)
+            if (filter <= FilterType.CONTRAST)
                 newImage = ApplyFunction(OriginalImage as Bitmap, filter, value);
+            else if (filter == FilterType.MEDIAN)
+                newImage = ApplyMedianFilter(pictureBox.Image as Bitmap);
             else
                 newImage = ApplyConvolution(pictureBox.Image as Bitmap, filter, value);
             newImage.Save("temp1.bmp");
             UpdateImageDisplay(newImage);
         }
 
-        private Image ApplyConvolution(Bitmap original, FilterType filter, int filterValue) {
+        private Image ApplyMedianFilter(Bitmap original) {
 
             Bitmap newImage = original.Clone() as Bitmap;
+            Bitmap greyscaleImage = original.Clone() as Bitmap;
 
-            double[,] matrix = new double[MATRIX_SIZE, MATRIX_SIZE];
-            int iterations = 1;
-
-            switch(filter) {
-                case (FilterType.BLUR):
-                    double coefficient = 1 / Math.Pow(MATRIX_SIZE, 2);
-                    for(int i = 0; i < MATRIX_SIZE; i++) {
-                        for(int j = 0; j < MATRIX_SIZE; j++)
-                            matrix[i, j] = coefficient;
-                    }
-
-                    iterations = (int)((((double)(filterValue + 255)) / 510) * 10);
-                    break;
-
-                case (FilterType.SHARPEN):
-                    for(int i = 0; i < MATRIX_SIZE; i++) {
-                        for(int j = 0; j < MATRIX_SIZE; j++)
-                            matrix[i, j] = -1;
-                    }
-                    matrix[MATRIX_SIZE / 2, MATRIX_SIZE / 2] = SHARPEN_KERNEL_ANCHOR_VALUE;
-                    matrix[0, 0] = 0;
-                    matrix[0, MATRIX_SIZE - 1] = 0;
-                    matrix[MATRIX_SIZE - 1, 0] = 0;
-                    matrix[MATRIX_SIZE - 1, MATRIX_SIZE - 1] = 0;
-
-                    iterations = (int)((((double)(filterValue + 255)) / 510) * 10);
-                    break;
-
-                case (FilterType.EDGE_DETECT):
-                    for(int i = 0; i < MATRIX_SIZE; i++) {
-                        for(int j = 0; j < MATRIX_SIZE; j++)
-                            matrix[i, j] = -1;
-                    }
-                    matrix[MATRIX_SIZE / 2, MATRIX_SIZE / 2] = EDGE_DETECT_KERNEL_ANCHOR_VALUE;
-
-                    iterations = 1;
-                    break;
-
-                case (FilterType.EMBOSS):
-                    for(int i = 0; i < MATRIX_SIZE; i++) {
-                        for(int j = 0; j < MATRIX_SIZE; j++)
-                            matrix[i, j] = 1;
-                    }
-                    matrix[0, 0] = -2;
-                    matrix[0, 1] = -1;
-                    matrix[1, 0] = -1;
-                    matrix[0, 2] = 0;
-                    matrix[2, 0] = 0;
-                    matrix[2, 2] = 2;
-
-                    iterations = 1;
-                    break;
+            //convert to greyscale:
+            for (int y = 0; y < original.Height; y++) {
+                for (int x = 0; x < original.Width; x++) {
+                    Color oldColor = original.GetPixel(x, y);
+                    int newValue = (oldColor.R + oldColor.G + oldColor.B) / 3;
+                    Color newColor = Color.FromArgb(newValue, newValue, newValue);
+                    greyscaleImage.SetPixel(x, y, newColor);
+                }
             }
 
-            for(int i = 0; i < iterations; i++) {
-                for(int y = 0; y < original.Height; y++) {
-                    for(int x = 0; x < original.Width; x++) {
+            for (int y = 0; y < greyscaleImage.Height; y++) {
+                for (int x = 0; x < greyscaleImage.Width; x++) {
 
-                        int red = 0;
-                        int green = 0;
-                        int blue = 0;
+                    List<int> neighbours = new List<int>();
 
-                        for(int matrixY = -MATRIX_SIZE / 2; matrixY <= MATRIX_SIZE / 2; matrixY++) {
-                            for(int matrixX = -MATRIX_SIZE / 2; matrixX <= MATRIX_SIZE / 2; matrixX++) {
-                                int sourceX = x + matrixX;
-                                int sourceY = y + matrixY;
+                    for (int matrixY = -MATRIX_SIZE / 2; matrixY <= MATRIX_SIZE / 2; matrixY++) {
+                        for (int matrixX = -MATRIX_SIZE / 2; matrixX <= MATRIX_SIZE / 2; matrixX++) {
 
-                                if(sourceX < 0)
-                                    sourceX = 0;
+                            int sourceX = x + matrixX;
+                            int sourceY = y + matrixY;
 
-                                if(sourceX >= original.Width)
-                                    sourceX = original.Width - 1;
+                            if (sourceX < 0)
+                                sourceX = 0;
 
-                                if(sourceY < 0)
-                                    sourceY = 0;
+                            if (sourceX >= original.Width)
+                                sourceX = original.Width - 1;
 
-                                if(sourceY >= original.Height)
-                                    sourceY = original.Height - 1;
+                            if (sourceY < 0)
+                                sourceY = 0;
 
-                                Color source = original.GetPixel(sourceX, sourceY);
+                            if (sourceY >= original.Height)
+                                sourceY = original.Height - 1;
 
-                                red += (int)(source.R * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
-                                green += (int)(source.G * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
-                                blue += (int)(source.B * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
-                            }
+                            Color source = greyscaleImage.GetPixel(sourceX, sourceY);
+                            neighbours.Add(source.R);
                         }
-                        red = Clamp(red, 0, 255);
-                        blue = Clamp(blue, 0, 255);
-                        green = Clamp(green, 0, 255);
-
-                        newImage.SetPixel(x, y, Color.FromArgb(red, green, blue));
                     }
+                    neighbours.Sort();
+                    int middle;
+                    if (neighbours.Count % 2 != 0)
+                        middle = neighbours[neighbours.Count / 2];
+                    else
+                        middle = (neighbours[neighbours.Count / 2] + neighbours[(neighbours.Count / 2) - 1]) / 2;
+                    newImage.SetPixel(x, y, Color.FromArgb(middle, middle, middle));
                 }
-                original = newImage;
             }
 
             return newImage;
         }
-
         Image ApplyFunction(Bitmap original, FilterType filter = FilterType.NULL_TRANSFORM, int filterValue = 0) {
 
             Bitmap newImage = original.Clone() as Bitmap;
 
-            switch(filter) {
+            switch (filter) {
                 case (FilterType.NULL_TRANSFORM):
                     break;
 
                 case (FilterType.INVERT):
-                    for(int i = 0; i < graph.CountPoints(); i++) {
+                    for (int i = 0; i < graph.CountPoints(); i++) {
                         Point point = graph.MaterialPoints.Values[i];
                         graph.MoveMaterialPoint(i, point.X, graphPanel.Height - point.Y);
                     }
                     break;
 
                 case (FilterType.BRIGHTEN):
-                    for(int i = 0; i < graph.CountPoints(); i++) {
+                    for (int i = 0; i < graph.CountPoints(); i++) {
                         Point point = graph.MaterialPoints.Values[i];
-                        graph.MoveMaterialPoint(i, point.X, point.Y - filterValue);
+                        Point abstractP = graph.Dictionary[point];
+                        graph.MoveAbstractPoint(i, abstractP.X, abstractP.Y + filterValue);
                     }
                     break;
 
                 case (FilterType.CONTRAST):
 
-                    double coefficient = 1 + ((((double)(filterValue)) / 255));
+                    double coefficient = 1 + (((double)(filterValue)) / 255);
 
-                    for(int i = 1; i < graph.CountPoints(); i++) {
+                    for (int i = 1; i < graph.CountPoints(); i++) {
                         Point a = graph.MaterialPoints.Values[i - 1];
                         Point b = graph.MaterialPoints.Values[i];
                         Point abstractA = graph.Dictionary[a];
@@ -378,8 +338,8 @@ namespace Parental_Advisory {
                     break;
             }
 
-            for(int y = 0; y < newImage.Height; y++) {
-                for(int x = 0; x < newImage.Width; x++) {
+            for (int y = 0; y < newImage.Height; y++) {
+                for (int x = 0; x < newImage.Width; x++) {
 
                     Color oldColor = newImage.GetPixel(x, y);
                     int red = oldColor.R;
@@ -398,15 +358,102 @@ namespace Parental_Advisory {
             return newImage;
         }
 
+        private Image ApplyConvolution(Bitmap original, FilterType filter, int filterValue) {
+
+            Bitmap newImage = original.Clone() as Bitmap;
+
+            double[,] matrix = new double[MATRIX_SIZE, MATRIX_SIZE];
+            int iterations = 1;
+
+            switch (filter) {
+                case (FilterType.BLUR):
+                    double coefficient = 1 / Math.Pow(MATRIX_SIZE, 2);
+                    for (int i = 0; i < MATRIX_SIZE; i++) {
+                        for (int j = 0; j < MATRIX_SIZE; j++)
+                            matrix[i, j] = coefficient;
+                    }
+                    break;
+
+                case (FilterType.SHARPEN):
+                    matrix = new double[,] { { 0, -1, 0 },
+                                            { -1, 5, -1 },
+                                            { 0, -1, 0 } };
+                    break;
+
+                case (FilterType.EDGE_DETECT):
+                    matrix = new double[,] { { -1, -1, -1 },
+                                            { -1, 8, -1 },
+                                            { -1, -1, -1 } };
+                    break;
+
+                case (FilterType.EMBOSS):
+                    matrix = new double[,] { { -2, -1, 0 },
+                                            { -1, 1, 1 },
+                                            { 0, 1, 2 } };
+                    break;
+
+                case (FilterType.GAUSSIAN_SMOOTHING):
+                    matrix = new double[,] { { 0, 1, 0 },
+                                            { 1, 4, 1 },
+                                            { 0, 1, 0 } };
+                    break;
+            }
+            iterations = 1;
+
+            for (int i = 0; i < iterations; i++) {
+                for (int y = 0; y < original.Height; y++) {
+                    for (int x = 0; x < original.Width; x++) {
+
+                        int red = 0;
+                        int green = 0;
+                        int blue = 0;
+
+                        for (int matrixY = -MATRIX_SIZE / 2; matrixY <= MATRIX_SIZE / 2; matrixY++) {
+                            for (int matrixX = -MATRIX_SIZE / 2; matrixX <= MATRIX_SIZE / 2; matrixX++) {
+                                int sourceX = x + matrixX;
+                                int sourceY = y + matrixY;
+
+                                if (sourceX < 0)
+                                    sourceX = 0;
+
+                                if (sourceX >= original.Width)
+                                    sourceX = original.Width - 1;
+
+                                if (sourceY < 0)
+                                    sourceY = 0;
+
+                                if (sourceY >= original.Height)
+                                    sourceY = original.Height - 1;
+
+                                Color source = original.GetPixel(sourceX, sourceY);
+
+                                red += (int)(source.R * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
+                                green += (int)(source.G * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
+                                blue += (int)(source.B * matrix[matrixX + MATRIX_SIZE / 2, matrixY + MATRIX_SIZE / 2]);
+                            }
+                        }
+                        red = Clamp(red, 0, 255);
+                        blue = Clamp(blue, 0, 255);
+                        green = Clamp(green, 0, 255);
+
+                        newImage.SetPixel(x, y, Color.FromArgb(red, green, blue));
+                    }
+                }
+                original = newImage;
+            }
+
+            return newImage;
+        }
+
         private int ApplyFilterToChannel(int intensity) {
 
             Point a = new Point(), b = new Point();
-            for(int i = 1; i < graph.CountPoints(); i++) {
+            for (int i = 1; i < graph.CountPoints(); i++) {
                 var point = graph.AbstractPoints.Values[i];
-                if(point.X >= intensity) {
+                if (point.X >= intensity) {
                     a = graph.AbstractPoints.Values[i - 1];
                     b = graph.AbstractPoints.Values[i];
-                     break;
+                    break;
                 }
             }
             //linFunction will be a tuple of doubles, first one is q, the second one is p
@@ -428,7 +475,7 @@ namespace Parental_Advisory {
 
         private void brightnessButton_Click(object sender, EventArgs e) {
             slider.ShowDialog();
-            if(slider.ValueObtained) {
+            if (slider.ValueObtained) {
                 var value = slider.Value;
                 slider.Reset();
                 ProcessImage(FilterType.BRIGHTEN, value);
@@ -436,7 +483,7 @@ namespace Parental_Advisory {
         }
         private void contrastButton_Click(object sender, EventArgs e) {
             slider.ShowDialog();
-            if(slider.ValueObtained) {
+            if (slider.ValueObtained) {
                 var value = slider.Value;
                 slider.Reset();
                 ProcessImage(FilterType.CONTRAST, value);
@@ -444,23 +491,25 @@ namespace Parental_Advisory {
         }
 
         private void blurButton_Click(object sender, EventArgs e) {
-            slider.MoveSliderTo(-255);
-            slider.ShowDialog();
-            if(slider.ValueObtained) {
-                var value = slider.Value;
-                slider.Reset();
-                ProcessImage(FilterType.BLUR, value);
-            }
+            //slider.MoveSliderTo(-255);
+            //slider.ShowDialog();
+            //if (slider.ValueObtained) {
+            //    var value = slider.Value;
+            //    slider.Reset();
+            //    ProcessImage(FilterType.BLUR, value);
+            //}
+            ProcessImage(FilterType.BLUR, 1);
         }
 
         private void sharpenButton_Click(object sender, EventArgs e) {
-            slider.MoveSliderTo(-255);
-            slider.ShowDialog();
-            if(slider.ValueObtained) {
-                var value = slider.Value;
-                slider.Reset();
-                ProcessImage(FilterType.SHARPEN, value);
-            }
+            //slider.MoveSliderTo(-255);
+            //slider.ShowDialog();
+            //if (slider.ValueObtained) {
+            //    var value = slider.Value;
+            //    slider.Reset();
+            //    ProcessImage(FilterType.SHARPEN, value);
+            //}
+            ProcessImage(FilterType.SHARPEN, 1);
         }
 
         private void edgeDetectButton_Click(object sender, EventArgs e) {
@@ -484,6 +533,12 @@ namespace Parental_Advisory {
             //}
             ProcessImage(FilterType.EMBOSS, 1);
         }
+        private void medianButton_Click(object sender, EventArgs e) {
+            ProcessImage(FilterType.MEDIAN, 1);
+        }
+        private void gaussianButton_Click(object sender, EventArgs e) {
+            ProcessImage(FilterType.GAUSSIAN_SMOOTHING, 1);
+        }
 
         private void pictureBox_Click(object sender, EventArgs e) {
 
@@ -492,9 +547,9 @@ namespace Parental_Advisory {
         //adding, moving, deleting points:
         #region
         private void graphPanel_MouseDown(object sender, MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left) {
-                foreach(var point in graph.MaterialPoints.Values) {
-                    if(AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS)) {
+            if (e.Button == MouseButtons.Left) {
+                foreach (var point in graph.MaterialPoints.Values) {
+                    if (AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS)) {
                         caughtPointIndex = graph.MaterialPoints.IndexOfValue(point);
                     }
                 }
@@ -502,7 +557,7 @@ namespace Parental_Advisory {
         }
 
         private void graphPanel_MouseMove(object sender, MouseEventArgs e) {
-            if(e.Button == MouseButtons.Left && caughtPointIndex > 0) {
+            if (e.Button == MouseButtons.Left && caughtPointIndex > 0) {
                 newCaughtPosition = e.Location;
                 graphIsUpdated = false;
                 graphPanel.Refresh();
@@ -510,10 +565,24 @@ namespace Parental_Advisory {
         }
 
         private void graphPanel_MouseUp(object sender, MouseEventArgs e) {
-            if(caughtPointIndex > 0) {
+            if (caughtPointIndex > 0) {
                 newCaughtPosition = e.Location;
                 graph.MoveMaterialPoint(caughtPointIndex, e.X, e.Y);
                 caughtPointIndex = -1;
+
+                bool hasStartPoint = false;
+                bool hasEndPoint = false;
+
+                foreach (var point in graph.AbstractPoints.Values) {
+                    if (point.X == 0) hasStartPoint = true;
+                    if (point.X == 255) hasEndPoint = true;
+                }
+
+                if (!hasStartPoint)
+                    graph.AddMaterialPoint(new Point(0, graphPanel.Height));
+                if (!hasEndPoint)
+                    graph.AddMaterialPoint(new Point(graphPanel.Width, 0));
+
                 graphPanel.Refresh();
                 ProcessImage();
             }
@@ -521,13 +590,13 @@ namespace Parental_Advisory {
 
         private void graphPanel_MouseClick(object sender, MouseEventArgs e) {
 
-            switch(e.Button) {
+            switch (e.Button) {
 
                 case (MouseButtons.Left):
-                    if(caughtPointIndex == -1 && graph.CountPoints() < 8) {
-                        for(int i = 0; i < graph.CountPoints(); i++) {
+                    if (caughtPointIndex == -1 && graph.CountPoints() < 8) {
+                        for (int i = 0; i < graph.CountPoints(); i++) {
                             Point point = graph.MaterialPoints.Values[i];
-                            if(AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS) || graph.MaterialPoints.ContainsKey(e.X))
+                            if (AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS) || graph.MaterialPoints.ContainsKey(e.X))
                                 return;
                         }
                         graph.AddMaterialPoint(e.Location);
@@ -536,9 +605,9 @@ namespace Parental_Advisory {
                     break;
 
                 case (MouseButtons.Right):
-                    for(int i = 0; i < graph.CountPoints(); i++) {
+                    for (int i = 0; i < graph.CountPoints(); i++) {
                         Point point = graph.MaterialPoints.Values[i];
-                        if(AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS)) {
+                        if (AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS)) {
                             graph.RemoveMaterialPoint(point);
                             ProcessImage();
                         }
@@ -551,9 +620,9 @@ namespace Parental_Advisory {
         //some helpful math functions:
         #region
         public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> {
-            if(value.CompareTo(min) < 0)
+            if (value.CompareTo(min) < 0)
                 return min;
-            if(value.CompareTo(max) > 0)
+            if (value.CompareTo(max) > 0)
                 return max;
             return value;
         }
@@ -566,7 +635,7 @@ namespace Parental_Advisory {
             //hilarious method, makes clicking "on" a vertex easier.
             int xDistance = p1.X - p2.X;
             int yDistance = p1.Y - p2.Y;
-            if(xDistance * xDistance + yDistance * yDistance <= radius)
+            if (xDistance * xDistance + yDistance * yDistance <= radius)
                 return true;
             else
                 return false;

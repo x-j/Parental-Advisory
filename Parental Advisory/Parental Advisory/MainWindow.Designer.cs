@@ -26,6 +26,11 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.bottomPanel = new System.Windows.Forms.Panel();
             this.filterPanel = new System.Windows.Forms.Panel();
+            this.gaussianButton = new System.Windows.Forms.Button();
+            this.medianButton = new System.Windows.Forms.Button();
+            this.embossButton = new System.Windows.Forms.Button();
+            this.edgeDetectButton = new System.Windows.Forms.Button();
+            this.sharpenButton = new System.Windows.Forms.Button();
             this.blurButton = new System.Windows.Forms.Button();
             this.contrastButton = new System.Windows.Forms.Button();
             this.brightnessButton = new System.Windows.Forms.Button();
@@ -37,9 +42,6 @@
             this.rightPanel = new System.Windows.Forms.Panel();
             this.resetButton = new System.Windows.Forms.Button();
             this.graphPanel = new System.Windows.Forms.Panel();
-            this.sharpenButton = new System.Windows.Forms.Button();
-            this.edgeDetectButton = new System.Windows.Forms.Button();
-            this.embossButton = new System.Windows.Forms.Button();
             this.bottomPanel.SuspendLayout();
             this.filterPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -73,6 +75,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.filterPanel.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.filterPanel.Controls.Add(this.gaussianButton);
+            this.filterPanel.Controls.Add(this.medianButton);
             this.filterPanel.Controls.Add(this.embossButton);
             this.filterPanel.Controls.Add(this.edgeDetectButton);
             this.filterPanel.Controls.Add(this.sharpenButton);
@@ -86,6 +90,96 @@
             this.filterPanel.TabIndex = 2;
             this.filterPanel.Visible = false;
             // 
+            // gaussianButton
+            // 
+            this.gaussianButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.gaussianButton.BackColor = System.Drawing.Color.Transparent;
+            this.gaussianButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.gaussianButton.FlatAppearance.BorderSize = 0;
+            this.gaussianButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.gaussianButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.gaussianButton.ForeColor = System.Drawing.Color.Black;
+            this.gaussianButton.Location = new System.Drawing.Point(393, 6);
+            this.gaussianButton.Name = "gaussianButton";
+            this.gaussianButton.Size = new System.Drawing.Size(97, 41);
+            this.gaussianButton.TabIndex = 11;
+            this.gaussianButton.Text = "Gaussian smoothing";
+            this.gaussianButton.UseVisualStyleBackColor = false;
+            this.gaussianButton.Click += new System.EventHandler(this.gaussianButton_Click);
+            // 
+            // medianButton
+            // 
+            this.medianButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.medianButton.BackColor = System.Drawing.Color.Transparent;
+            this.medianButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.medianButton.FlatAppearance.BorderSize = 0;
+            this.medianButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.medianButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.medianButton.ForeColor = System.Drawing.Color.Black;
+            this.medianButton.Location = new System.Drawing.Point(351, 50);
+            this.medianButton.Name = "medianButton";
+            this.medianButton.Size = new System.Drawing.Size(74, 41);
+            this.medianButton.TabIndex = 10;
+            this.medianButton.Text = "Median";
+            this.medianButton.UseVisualStyleBackColor = false;
+            this.medianButton.Click += new System.EventHandler(this.medianButton_Click);
+            // 
+            // embossButton
+            // 
+            this.embossButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.embossButton.BackColor = System.Drawing.Color.Transparent;
+            this.embossButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.embossButton.FlatAppearance.BorderSize = 0;
+            this.embossButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.embossButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.embossButton.ForeColor = System.Drawing.Color.Black;
+            this.embossButton.Location = new System.Drawing.Point(271, 50);
+            this.embossButton.Name = "embossButton";
+            this.embossButton.Size = new System.Drawing.Size(74, 41);
+            this.embossButton.TabIndex = 9;
+            this.embossButton.Text = "Emboss";
+            this.embossButton.UseVisualStyleBackColor = false;
+            this.embossButton.Click += new System.EventHandler(this.embossButton_Click);
+            // 
+            // edgeDetectButton
+            // 
+            this.edgeDetectButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.edgeDetectButton.BackColor = System.Drawing.Color.Transparent;
+            this.edgeDetectButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.edgeDetectButton.FlatAppearance.BorderSize = 0;
+            this.edgeDetectButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.edgeDetectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.edgeDetectButton.ForeColor = System.Drawing.Color.Black;
+            this.edgeDetectButton.Location = new System.Drawing.Point(178, 50);
+            this.edgeDetectButton.Name = "edgeDetectButton";
+            this.edgeDetectButton.Size = new System.Drawing.Size(87, 44);
+            this.edgeDetectButton.TabIndex = 8;
+            this.edgeDetectButton.Text = "Edge detect";
+            this.edgeDetectButton.UseVisualStyleBackColor = false;
+            this.edgeDetectButton.Click += new System.EventHandler(this.edgeDetectButton_Click);
+            // 
+            // sharpenButton
+            // 
+            this.sharpenButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.sharpenButton.BackColor = System.Drawing.Color.Transparent;
+            this.sharpenButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.sharpenButton.FlatAppearance.BorderSize = 0;
+            this.sharpenButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.sharpenButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.sharpenButton.ForeColor = System.Drawing.Color.Black;
+            this.sharpenButton.Location = new System.Drawing.Point(96, 50);
+            this.sharpenButton.Name = "sharpenButton";
+            this.sharpenButton.Size = new System.Drawing.Size(76, 44);
+            this.sharpenButton.TabIndex = 7;
+            this.sharpenButton.Text = "Sharpen";
+            this.sharpenButton.UseVisualStyleBackColor = false;
+            this.sharpenButton.Click += new System.EventHandler(this.sharpenButton_Click);
+            // 
             // blurButton
             // 
             this.blurButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -94,11 +188,11 @@
             this.blurButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.blurButton.FlatAppearance.BorderSize = 0;
             this.blurButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.blurButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.blurButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.blurButton.ForeColor = System.Drawing.Color.Black;
-            this.blurButton.Location = new System.Drawing.Point(226, 3);
+            this.blurButton.Location = new System.Drawing.Point(3, 53);
             this.blurButton.Name = "blurButton";
-            this.blurButton.Size = new System.Drawing.Size(42, 91);
+            this.blurButton.Size = new System.Drawing.Size(87, 41);
             this.blurButton.TabIndex = 6;
             this.blurButton.Text = "Blur";
             this.blurButton.UseVisualStyleBackColor = false;
@@ -112,11 +206,11 @@
             this.contrastButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.contrastButton.FlatAppearance.BorderSize = 0;
             this.contrastButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.contrastButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.contrastButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.contrastButton.ForeColor = System.Drawing.Color.Black;
-            this.contrastButton.Location = new System.Drawing.Point(155, 4);
+            this.contrastButton.Location = new System.Drawing.Point(178, 5);
             this.contrastButton.Name = "contrastButton";
-            this.contrastButton.Size = new System.Drawing.Size(65, 91);
+            this.contrastButton.Size = new System.Drawing.Size(87, 41);
             this.contrastButton.TabIndex = 5;
             this.contrastButton.Text = "Contrast";
             this.contrastButton.UseVisualStyleBackColor = false;
@@ -130,11 +224,11 @@
             this.brightnessButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.brightnessButton.FlatAppearance.BorderSize = 0;
             this.brightnessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.brightnessButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.brightnessButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.brightnessButton.ForeColor = System.Drawing.Color.Black;
-            this.brightnessButton.Location = new System.Drawing.Point(73, 4);
+            this.brightnessButton.Location = new System.Drawing.Point(96, 3);
             this.brightnessButton.Name = "brightnessButton";
-            this.brightnessButton.Size = new System.Drawing.Size(76, 91);
+            this.brightnessButton.Size = new System.Drawing.Size(76, 43);
             this.brightnessButton.TabIndex = 4;
             this.brightnessButton.Text = "Brightness";
             this.brightnessButton.UseVisualStyleBackColor = false;
@@ -148,11 +242,11 @@
             this.invertButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.invertButton.FlatAppearance.BorderSize = 0;
             this.invertButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.invertButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.invertButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.invertButton.ForeColor = System.Drawing.Color.Black;
             this.invertButton.Location = new System.Drawing.Point(3, 5);
             this.invertButton.Name = "invertButton";
-            this.invertButton.Size = new System.Drawing.Size(64, 91);
+            this.invertButton.Size = new System.Drawing.Size(87, 42);
             this.invertButton.TabIndex = 3;
             this.invertButton.Text = "Color invert";
             this.invertButton.UseVisualStyleBackColor = false;
@@ -164,7 +258,7 @@
             this.button1.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button1.FlatAppearance.BorderSize = 0;
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button1.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.button1.ForeColor = System.Drawing.Color.Black;
             this.button1.Location = new System.Drawing.Point(329, -54);
             this.button1.Name = "button1";
@@ -181,7 +275,7 @@
             this.loadImageButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.loadImageButton.FlatAppearance.BorderSize = 0;
             this.loadImageButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.loadImageButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.loadImageButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.loadImageButton.ForeColor = System.Drawing.Color.Black;
             this.loadImageButton.Location = new System.Drawing.Point(3, 4);
             this.loadImageButton.Name = "loadImageButton";
@@ -238,7 +332,7 @@
             this.resetButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.resetButton.FlatAppearance.BorderSize = 0;
             this.resetButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.resetButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.resetButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.resetButton.ForeColor = System.Drawing.Color.Black;
             this.resetButton.Location = new System.Drawing.Point(3, 238);
             this.resetButton.Name = "resetButton";
@@ -262,60 +356,6 @@
             this.graphPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseDown);
             this.graphPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseMove);
             this.graphPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.graphPanel_MouseUp);
-            // 
-            // sharpenButton
-            // 
-            this.sharpenButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.sharpenButton.BackColor = System.Drawing.Color.Transparent;
-            this.sharpenButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.sharpenButton.FlatAppearance.BorderSize = 0;
-            this.sharpenButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.sharpenButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.sharpenButton.ForeColor = System.Drawing.Color.Black;
-            this.sharpenButton.Location = new System.Drawing.Point(274, 3);
-            this.sharpenButton.Name = "sharpenButton";
-            this.sharpenButton.Size = new System.Drawing.Size(64, 91);
-            this.sharpenButton.TabIndex = 7;
-            this.sharpenButton.Text = "Sharpen";
-            this.sharpenButton.UseVisualStyleBackColor = false;
-            this.sharpenButton.Click += new System.EventHandler(this.sharpenButton_Click);
-            // 
-            // edgeDetectButton
-            // 
-            this.edgeDetectButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.edgeDetectButton.BackColor = System.Drawing.Color.Transparent;
-            this.edgeDetectButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.edgeDetectButton.FlatAppearance.BorderSize = 0;
-            this.edgeDetectButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.edgeDetectButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.edgeDetectButton.ForeColor = System.Drawing.Color.Black;
-            this.edgeDetectButton.Location = new System.Drawing.Point(344, 3);
-            this.edgeDetectButton.Name = "edgeDetectButton";
-            this.edgeDetectButton.Size = new System.Drawing.Size(66, 91);
-            this.edgeDetectButton.TabIndex = 8;
-            this.edgeDetectButton.Text = "Edge detect";
-            this.edgeDetectButton.UseVisualStyleBackColor = false;
-            this.edgeDetectButton.Click += new System.EventHandler(this.edgeDetectButton_Click);
-            // 
-            // embossButton
-            // 
-            this.embossButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.embossButton.BackColor = System.Drawing.Color.Transparent;
-            this.embossButton.FlatAppearance.BorderColor = System.Drawing.Color.White;
-            this.embossButton.FlatAppearance.BorderSize = 0;
-            this.embossButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.embossButton.Font = new System.Drawing.Font("Open Sans", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.embossButton.ForeColor = System.Drawing.Color.Black;
-            this.embossButton.Location = new System.Drawing.Point(416, 4);
-            this.embossButton.Name = "embossButton";
-            this.embossButton.Size = new System.Drawing.Size(66, 91);
-            this.embossButton.TabIndex = 9;
-            this.embossButton.Text = "Emboss";
-            this.embossButton.UseVisualStyleBackColor = false;
-            this.embossButton.Click += new System.EventHandler(this.embossButton_Click);
             // 
             // MainWindow
             // 
@@ -356,6 +396,8 @@
         private System.Windows.Forms.Button sharpenButton;
         private System.Windows.Forms.Button embossButton;
         private System.Windows.Forms.Button edgeDetectButton;
+        private System.Windows.Forms.Button medianButton;
+        private System.Windows.Forms.Button gaussianButton;
     }
 }
 
