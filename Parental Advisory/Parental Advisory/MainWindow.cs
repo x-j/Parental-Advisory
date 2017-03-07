@@ -13,6 +13,7 @@ namespace Parental_Advisory {
         private const int GRAPH_LINE_WIDTH = 3;
         private const int POINT_CATCH_RADIUS = 8;
         private const int MATRIX_SIZE = 3;
+        private const double SHARPEN_KERNEL_ANCHOR_VALUE = 5.0;
 
         private bool graphIsUpdated;
         private Image OriginalImage;
@@ -23,9 +24,13 @@ namespace Parental_Advisory {
         private Graph graph;
         private int caughtPointIndex;
         private Point newCaughtPosition;
+        private double EDGE_DETECT_KERNEL_ANCHOR_VALUE = 8;
 
         private enum FilterType {
-            NULL_TRANSFORM, INVERT, BRIGHTEN, CONTRAST, BLUR
+            NULL_TRANSFORM, INVERT, BRIGHTEN, CONTRAST, BLUR,
+            SHARPEN,
+            EDGE_DETECT,
+            EMBOSS
         }
 
         public MainWindow() {
@@ -94,27 +99,27 @@ namespace Parental_Advisory {
                 DashStyle = System.Drawing.Drawing2D.DashStyle.DashDot
             };
 
-            Point[] workingCopy = new Point[graph.CountPoints()];
-            graph.MaterialPoints.Values.CopyTo(workingCopy, 0);
+            Point[] workingCopies = new Point[graph.CountPoints()];
+            graph.MaterialPoints.Values.CopyTo(workingCopies, 0);
 
-            try{
+            try {
                 if(caughtPointIndex > 0) {
-                    workingCopy[caughtPointIndex] = newCaughtPosition;
-                    for(int i = 0; i < workingCopy.Length - 1; i++) {
-                        for(int j = 0; j < workingCopy.Length - 1; j++) {
-                            if(workingCopy[j].X > workingCopy[j + 1].X) {
-                                Point temp = new Point(workingCopy[j].X, workingCopy[j].Y);
-                                workingCopy[j] = workingCopy[j + 1];
-                                workingCopy[j + 1] = temp;
+                    workingCopies[caughtPointIndex] = newCaughtPosition;
+                    for(int i = 0; i < workingCopies.Length - 1; i++) {
+                        for(int j = 0; j < workingCopies.Length - 1; j++) {
+                            if(workingCopies[j].X > workingCopies[j + 1].X) {
+                                Point temp = new Point(workingCopies[j].X, workingCopies[j].Y);
+                                workingCopies[j] = workingCopies[j + 1];
+                                workingCopies[j + 1] = temp;
                             }
                         }
                     }
                 }
 
                 //the for loop below draws the correct lines between points
-                for(int i = 1; i < workingCopy.Length; i++) {
-                    Point a = workingCopy[i - 1];
-                    Point b = workingCopy[i];
+                for(int i = 1; i < workingCopies.Length; i++) {
+                    Point a = workingCopies[i - 1];
+                    Point b = workingCopies[i];
 
                     bool segmentInRange = true;
 
@@ -229,12 +234,52 @@ namespace Parental_Advisory {
 
             switch(filter) {
                 case (FilterType.BLUR):
-                    double coefficient = 1/Math.Pow(MATRIX_SIZE,2);
+                    double coefficient = 1 / Math.Pow(MATRIX_SIZE, 2);
                     for(int i = 0; i < MATRIX_SIZE; i++) {
                         for(int j = 0; j < MATRIX_SIZE; j++)
                             matrix[i, j] = coefficient;
                     }
-                    iterations = (int) ((((double)(filterValue+255))/ 255)*10);
+
+                    iterations = (int)((((double)(filterValue + 255)) / 510) * 10);
+                    break;
+
+                case (FilterType.SHARPEN):
+                    for(int i = 0; i < MATRIX_SIZE; i++) {
+                        for(int j = 0; j < MATRIX_SIZE; j++)
+                            matrix[i, j] = -1;
+                    }
+                    matrix[MATRIX_SIZE / 2, MATRIX_SIZE / 2] = SHARPEN_KERNEL_ANCHOR_VALUE;
+                    matrix[0, 0] = 0;
+                    matrix[0, MATRIX_SIZE - 1] = 0;
+                    matrix[MATRIX_SIZE - 1, 0] = 0;
+                    matrix[MATRIX_SIZE - 1, MATRIX_SIZE - 1] = 0;
+
+                    iterations = (int)((((double)(filterValue + 255)) / 510) * 10);
+                    break;
+
+                case (FilterType.EDGE_DETECT):
+                    for(int i = 0; i < MATRIX_SIZE; i++) {
+                        for(int j = 0; j < MATRIX_SIZE; j++)
+                            matrix[i, j] = -1;
+                    }
+                    matrix[MATRIX_SIZE / 2, MATRIX_SIZE / 2] = EDGE_DETECT_KERNEL_ANCHOR_VALUE;
+
+                    iterations = 1;
+                    break;
+
+                case (FilterType.EMBOSS):
+                    for(int i = 0; i < MATRIX_SIZE; i++) {
+                        for(int j = 0; j < MATRIX_SIZE; j++)
+                            matrix[i, j] = 1;
+                    }
+                    matrix[0, 0] = -2;
+                    matrix[0, 1] = -1;
+                    matrix[1, 0] = -1;
+                    matrix[0, 2] = 0;
+                    matrix[2, 0] = 0;
+                    matrix[2, 2] = 2;
+
+                    iterations = 1;
                     break;
             }
 
@@ -353,10 +398,6 @@ namespace Parental_Advisory {
             return newImage;
         }
 
-        private int EvaluateLinFun(int x, Tuple<double, double> linFunction) {
-            return (int)(linFunction.Item2 * x + linFunction.Item1);
-        }
-
         private int ApplyFilterToChannel(int intensity) {
 
             Point a = new Point(), b = new Point();
@@ -365,7 +406,7 @@ namespace Parental_Advisory {
                 if(point.X >= intensity) {
                     a = graph.AbstractPoints.Values[i - 1];
                     b = graph.AbstractPoints.Values[i];
-                    break;
+                     break;
                 }
             }
             //linFunction will be a tuple of doubles, first one is q, the second one is p
@@ -410,6 +451,38 @@ namespace Parental_Advisory {
                 slider.Reset();
                 ProcessImage(FilterType.BLUR, value);
             }
+        }
+
+        private void sharpenButton_Click(object sender, EventArgs e) {
+            slider.MoveSliderTo(-255);
+            slider.ShowDialog();
+            if(slider.ValueObtained) {
+                var value = slider.Value;
+                slider.Reset();
+                ProcessImage(FilterType.SHARPEN, value);
+            }
+        }
+
+        private void edgeDetectButton_Click(object sender, EventArgs e) {
+            //slider.MoveSliderTo(-255);
+            //slider.ShowDialog();
+            //if(slider.ValueObtained) {
+            //    var value = slider.Value;
+            //    slider.Reset();
+            //    ProcessImage(FilterType.EDGE_DETECT, value);
+            //}
+            ProcessImage(FilterType.EDGE_DETECT, 1);
+        }
+
+        private void embossButton_Click(object sender, EventArgs e) {
+            //slider.MoveSliderTo(-255);
+            //slider.ShowDialog();
+            //if(slider.ValueObtained) {
+            //    var value = slider.Value;
+            //    slider.Reset();
+            //    ProcessImage(FilterType.EMBOSS, value);
+            //}
+            ProcessImage(FilterType.EMBOSS, 1);
         }
 
         private void pictureBox_Click(object sender, EventArgs e) {
@@ -498,6 +571,10 @@ namespace Parental_Advisory {
             else
                 return false;
         }
+        private int EvaluateLinFun(int x, Tuple<double, double> linFunction) {
+            return (int)(linFunction.Item2 * x + linFunction.Item1);
+        }
+
         #endregion
 
     }
