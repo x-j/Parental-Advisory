@@ -16,8 +16,7 @@ namespace Parental_Advisory {
         }
 
         public int Value {
-            get;
-            private set;
+            get; set;
         }
         public bool ValueObtained {
             get;
@@ -39,6 +38,10 @@ namespace Parental_Advisory {
 
         internal void Reset() {
             trackBar.Value = 0;
+        }
+
+        internal void MoveSliderTo(int v) {
+            trackBar.Value = v;
         }
     }
 }

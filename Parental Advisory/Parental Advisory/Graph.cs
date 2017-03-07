@@ -43,13 +43,26 @@ namespace Parental_Advisory {
 
         //panelPointAdd adds a point from the panel
         internal void AddMaterialPoint(Point p) {
-            MaterialPoints.Add(p.X, p);
+            try {
+                MaterialPoints.Add(p.X, p);
 
-            //translate the new point into the abstract 0-255 context
-            Point abstractP = CreateAbstractFromMaterial(p);
-            AbstractPoints.Add(abstractP.X, abstractP);
+                //translate the new point into the abstract 0-255 context
+                Point abstractP = CreateAbstractFromMaterial(p);
+                AbstractPoints.Add(abstractP.X, abstractP);
 
-            Dictionary.Add(p, abstractP);
+                Dictionary.Add(p, abstractP);
+            } catch(ArgumentException) {
+                Random r = new Random();
+                int v = r.Next(0, 100);
+                p.X += (v > 50 ? 1 : -1);
+                MaterialPoints.Add(p.X, p);
+
+                //translate the new point into the abstract 0-255 context
+                Point abstractP = CreateAbstractFromMaterial(p);
+                AbstractPoints.Add(abstractP.X, abstractP);
+
+                Dictionary.Add(p, abstractP);
+            }
         }
 
         internal void MoveMaterialPoint(int panelIndex, int newX, int newY) {
