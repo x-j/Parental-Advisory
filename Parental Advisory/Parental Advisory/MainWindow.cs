@@ -220,7 +220,7 @@ namespace Parental_Advisory {
             return bitmap;
         }
 
-        private void ProcessImage(FilterType filter = FilterType.NULL_TRANSFORM, int value = 0) {
+        private void ProcessImage(FilterType filter = FilterType.NULL_TRANSFORM, double value = 0) {
 
             Image newImage;
             if (filter <= FilterType.CONTRAST)
@@ -287,7 +287,7 @@ namespace Parental_Advisory {
 
             return newImage;
         }
-        Image ApplyFunction(Bitmap original, FilterType filter = FilterType.NULL_TRANSFORM, int filterValue = 0) {
+        Image ApplyFunction(Bitmap original, FilterType filter = FilterType.NULL_TRANSFORM, double filterValue = 0) {
 
             Bitmap newImage = original.Clone() as Bitmap;
 
@@ -304,36 +304,18 @@ namespace Parental_Advisory {
 
                 case (FilterType.BRIGHTEN):
                     for (int i = 0; i < graph.CountPoints(); i++) {
-                        Point point = graph.MaterialPoints.Values[i];
-                        Point abstractP = graph.Dictionary[point];
-                        graph.MoveAbstractPoint(i, abstractP.X, abstractP.Y + filterValue);
+                        Point point = graph.AbstractPoints.Values[i];
+                        graph.MoveAbstractPoint(i, point.X, point.Y + (int)filterValue);
                     }
                     break;
 
                 case (FilterType.CONTRAST):
 
-                    double coefficient = 1 + (((double)(filterValue)) / 255);
+                    double coefficient = (((double)(filterValue)));
 
-                    for (int i = 1; i < graph.CountPoints(); i++) {
-                        Point a = graph.MaterialPoints.Values[i - 1];
-                        Point b = graph.MaterialPoints.Values[i];
-                        Point abstractA = graph.Dictionary[a];
-                        Point abstractB = graph.Dictionary[b];
-
-                        var linFunction = BuildLinFunction(abstractA, abstractB);
-                        Point middle = new Point((abstractB.X - abstractA.X) / 2, EvaluateLinFun((abstractB.X - abstractA.X) / 2, linFunction));
-
-                        double newSlope = coefficient * linFunction.Item2;
-                        double newIntercept = middle.Y - newSlope * middle.X;
-
-                        Point newAA = new Point(abstractA.X, (int)(newSlope * (abstractA.X) + newIntercept));
-                        Point newAB = new Point(abstractB.X, (int)(newSlope * (abstractB.X) + newIntercept));
-
-                        Point newMA = graph.CreateMaterialFromAbstract(newAA);
-                        Point newMB = graph.CreateMaterialFromAbstract(newAB);
-
-                        graph.MoveMaterialPoint(a, newMA.X, newMA.Y);
-                        graph.MoveMaterialPoint(b, newMB.X, newMB.Y);
+                    for (int i = 0; i < graph.CountPoints(); i++) {
+                        Point p = graph.AbstractPoints.Values[i];
+                        graph.MoveAbstractPoint(i, p.X, (int)(coefficient * (p.Y - 128) + 128));
                     }
                     break;
             }
@@ -358,7 +340,7 @@ namespace Parental_Advisory {
             return newImage;
         }
 
-        private Image ApplyConvolution(Bitmap original, FilterType filter, int filterValue) {
+        private Image ApplyConvolution(Bitmap original, FilterType filter, double filterValue) {
 
             Bitmap newImage = original.Clone() as Bitmap;
 
@@ -482,10 +464,10 @@ namespace Parental_Advisory {
             }
         }
         private void contrastButton_Click(object sender, EventArgs e) {
-            slider.ShowDialog();
-            if (slider.ValueObtained) {
-                var value = slider.Value;
-                slider.Reset();
+            OtherSlider tempSlider = new OtherSlider();
+            tempSlider.ShowDialog();
+            if (tempSlider.ValueObtained) {
+                var value = tempSlider.Value;
                 ProcessImage(FilterType.CONTRAST, value);
             }
         }
@@ -609,9 +591,25 @@ namespace Parental_Advisory {
                         Point point = graph.MaterialPoints.Values[i];
                         if (AreCloseTogether(point, e.Location, POINT_CATCH_RADIUS)) {
                             graph.RemoveMaterialPoint(point);
-                            ProcessImage();
+                            break;
                         }
                     }
+                    bool hasStartPoint = false;
+                    bool hasEndPoint = false;
+
+                    foreach(var point in graph.AbstractPoints.Values) {
+                        if(point.X == 0)
+                            hasStartPoint = true;
+                        if(point.X == 255)
+                            hasEndPoint = true;
+                    }
+
+                    if(!hasStartPoint)
+                        graph.AddMaterialPoint(new Point(0, graphPanel.Height));
+                    if(!hasEndPoint)
+                        graph.AddMaterialPoint(new Point(graphPanel.Width, 0));
+                    graphPanel.Refresh();
+                    ProcessImage();
                     break;
             }
         }

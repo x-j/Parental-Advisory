@@ -58,6 +58,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="OtherSlider.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OtherSlider.Designer.cs">
+      <DependentUpon>OtherSlider.cs</DependentUpon>
+    </Compile>
     <Compile Include="SliderDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +82,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="OtherSlider.resx">
+      <DependentUpon>OtherSlider.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SliderDialog.resx">
       <DependentUpon>SliderDialog.cs</DependentUpon>
     </EmbeddedResource>
