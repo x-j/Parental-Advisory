@@ -94,8 +94,8 @@
         }
 
         #endregion
-        private System.Windows.Forms.Label label;
-        private System.Windows.Forms.NumericUpDown upDown;
         private System.Windows.Forms.Button okButton;
+        public System.Windows.Forms.NumericUpDown upDown;
+        public System.Windows.Forms.Label label;
     }
 }
