@@ -49,13 +49,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FilterType.cs" />
     <Compile Include="Graph.cs" />
+    <Compile Include="ImageTransformations.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="MathHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OtherSlider.cs">
@@ -63,6 +66,12 @@
     </Compile>
     <Compile Include="OtherSlider.Designer.cs">
       <DependentUpon>OtherSlider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuantizationControl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuantizationControl.Designer.cs">
+      <DependentUpon>QuantizationControl.cs</DependentUpon>
     </Compile>
     <Compile Include="SliderDialog.cs">
       <SubType>Form</SubType>
@@ -84,6 +93,9 @@
     </Compile>
     <EmbeddedResource Include="OtherSlider.resx">
       <DependentUpon>OtherSlider.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuantizationControl.resx">
+      <DependentUpon>QuantizationControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SliderDialog.resx">
       <DependentUpon>SliderDialog.cs</DependentUpon>

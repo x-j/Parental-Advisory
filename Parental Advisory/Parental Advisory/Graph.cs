@@ -6,7 +6,6 @@ using System.Windows.Forms;
 namespace Parental_Advisory {
     class Graph {
 
-        private Panel panel;
         //Start and End are start- and endpoints in the context of the panel
         public Point Start { get; private set; }
         public Point End { get; private set; }
@@ -15,11 +14,13 @@ namespace Parental_Advisory {
         public Dictionary<Point, Point> Dictionary { get; private set; }
         public SortedList<int, Point> MaterialPoints { get; private set; }
         public SortedList<int, Point> AbstractPoints { get; private set; }
+        public Panel Panel { get; private set; }
+
         public int CountPoints() => AbstractPoints.Count;
 
         public Graph(Panel graphpanel) {
 
-            panel = graphpanel;
+            Panel = graphpanel;
             Start = new Point(0, graphpanel.Height);
             End = Point.Add(Start, new Size(graphpanel.Width, -graphpanel.Height));
             EndX = new Point(graphpanel.Width, graphpanel.Height);
@@ -119,14 +120,14 @@ namespace Parental_Advisory {
 
 
         public Point CreateAbstractFromMaterial(Point p) {
-            int abstractX = (int)(((double)p.X / panel.Width) * 255);
-            int abstractY = (int)(((double)(panel.Height - p.Y) / panel.Height) * 255);
+            int abstractX = (int)(((double)p.X / Panel.Width) * 255);
+            int abstractY = (int)(((double)(Panel.Height - p.Y) / Panel.Height) * 255);
             return new Point(abstractX, abstractY);
         }
 
         public Point CreateMaterialFromAbstract(Point p) {
-            int materialX = (int)(((double)p.X / 255) * panel.Width);
-            int materialY = -(int)(((double)p.Y / 255) * panel.Height) + panel.Height;
+            int materialX = (int)(((double)p.X / 255) * Panel.Width);
+            int materialY = -(int)(((double)p.Y / 255) * Panel.Height) + Panel.Height;
             return new Point(materialX, materialY);
         }
 
